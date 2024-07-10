@@ -44,7 +44,7 @@
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
 
-            if (username === '1234' && password === '1234') {
+            if (username === 'admin' && password === 'admin123') {
                 showVerificationCode();
             } else {
                 alert('Invalid username or password. Please try again.');
@@ -55,31 +55,25 @@
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('codeSection').style.display = 'block';
 
-            updateCode(); // Initial code update
-            startTimer(); // Start the timer for code update
+            fetchCode(); // Initial code fetch
+            startCountdown(); // Start countdown for next code update
 
-            // Start countdown for next code update
-            startCountdown();
-        }
-
-        function updateCode() {
-            var code = generateRandomCode();
-            document.getElementById('verificationCode').textContent = code;
-        }
-
-        function generateRandomCode() {
-            return Math.floor(100000 + Math.random() * 900000);
-        }
-
-        function startTimer() {
             if (timerInterval) {
                 clearInterval(timerInterval); // Clear the previous interval if exists
             }
 
             timerInterval = setInterval(function() {
-                updateCode(); // Update code every minute
-                startCountdown(); // Start countdown for next update
-            }, 60000); // Update code every minute
+                fetchCode(); // Fetch new code every minute
+                startCountdown(); // Restart countdown for next update
+            }, 60000); // Fetch new code every minute
+        }
+
+        function fetchCode() {
+            fetch('/code')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('verificationCode').textContent = data.code;
+                });
         }
 
         function startCountdown() {
@@ -97,20 +91,6 @@
                 }
             }, 1000);
         }
-
-        // Handle page visibility change (e.g., user goes away)
-        document.addEventListener("visibilitychange", function() {
-            if (document.visibilityState === 'hidden') {
-                if (timerInterval) {
-                    clearInterval(timerInterval); // Stop the timer when page is hidden
-                    clearInterval(countdownInterval); // Stop countdown as well
-                }
-            } else {
-                // Resume timer when page becomes visible again
-                startTimer();
-                startCountdown(); // Restart countdown
-            }
-        });
     </script>
 </body>
 </html>

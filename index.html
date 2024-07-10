@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticator Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .code {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Authenticator Website</h1>
+        <div class="login-form">
+            <form id="loginForm" onsubmit="return false;">
+                <input type="text" id="username" placeholder="Username" required><br><br>
+                <input type="password" id="password" placeholder="Password" required><br><br>
+                <button onclick="login()">Login</button>
+            </form>
+        </div>
+        <div id="codeSection" style="display: none;">
+            <h2>Your Verification Code</h2>
+            <div class="code" id="verificationCode"></div>
+            <div id="countdown"></div>
+        </div>
+    </div>
+
+    <script>
+        var timerInterval = null; // Global variable to hold the interval
+        var countdownInterval = null; // Global variable to hold the countdown interval
+
+        function login() {
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            if (username === '1234' && password === '1234') {
+                showVerificationCode();
+            } else {
+                alert('Invalid username or password. Please try again.');
+            }
+        }
+
+        function showVerificationCode() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('codeSection').style.display = 'block';
+
+            updateCode(); // Initial code update
+            startTimer(); // Start the timer for code update
+
+            // Start countdown for next code update
+            startCountdown();
+        }
+
+        function updateCode() {
+            var code = generateRandomCode();
+            document.getElementById('verificationCode').textContent = code;
+        }
+
+        function generateRandomCode() {
+            return Math.floor(100000 + Math.random() * 900000);
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval); // Clear the previous interval if exists
+            }
+
+            timerInterval = setInterval(function() {
+                updateCode(); // Update code every minute
+                startCountdown(); // Start countdown for next update
+            }, 60000); // Update code every minute
+        }
+
+        function startCountdown() {
+            var timeLeft = 60; // Seconds
+
+            if (countdownInterval) {
+                clearInterval(countdownInterval); // Clear the previous countdown interval if exists
+            }
+
+            countdownInterval = setInterval(function() {
+                document.getElementById('countdown').textContent = 'Next update in ' + timeLeft + ' seconds';
+                timeLeft -= 1;
+                if (timeLeft < 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        // Handle page visibility change (e.g., user goes away)
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === 'hidden') {
+                if (timerInterval) {
+                    clearInterval(timerInterval); // Stop the timer when page is hidden
+                    clearInterval(countdownInterval); // Stop countdown as well
+                }
+            } else {
+                // Resume timer when page becomes visible again
+                startTimer();
+                startCountdown(); // Restart countdown
+            }
+        });
+    </script>
+</body>
+</html>
